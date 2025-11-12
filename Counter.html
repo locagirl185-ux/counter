@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Countdown Page</title>
+  <!-- Google Fonts: Great Vibes for signature style -->
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, black, darkred);
+      overflow: hidden;
+      color: white;
+      padding-top: 80px;
+      position: relative;
+    }
+
+    .flow-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 200%;
+      background: url('data:image/svg+xml;utf8,\
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="320">\
+<path fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" d="M0,160 C320,80 640,240 960,160 C1280,80 1600,240 1920,160 L1920,320 L0,320 Z"/>\
+</svg>') repeat-x;
+      background-size: cover;
+      animation: waveMove 10s linear infinite;
+      opacity: 0.3;
+      z-index: 0;
+    }
+
+    @keyframes waveMove {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    .box-title {
+      font-family: 'Great Vibes', cursive;
+      font-size: 3rem;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px rgba(255,255,255,0.3);
+      z-index: 1;
+      position: relative;
+    }
+
+    .countdown-box {
+      background: rgba(0, 0, 0, 0.6);
+      border: 4px solid rgba(200, 50, 50, 0.9);
+      border-radius: 24px;
+      padding: 60px 100px;
+      text-align: center;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+      transition: all 0.4s ease;
+      transform: scale(1);
+      margin-bottom: 40px;
+      z-index: 1;
+      position: relative;
+    }
+
+    .countdown-box:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 35px rgba(200,50,50,0.6);
+      border-color: rgba(200, 50, 50, 1);
+    }
+
+    .days {
+      font-family: 'Great Vibes', cursive;
+      font-size: 8rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #cc3333;
+    }
+
+    .label {
+      font-family: 'Great Vibes', cursive; 
+      font-size: 1.5rem;
+      opacity: 0.9;
+    }
+
+    .progress-title {
+      font-family: 'Great Vibes', cursive;
+      font-size: 2rem;
+      margin-top: 40px;
+      margin-bottom: 10px;
+      opacity: 0.9;
+    }
+
+    .progress-container {
+      width: 80%;
+      max-width: 500px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+      position: relative;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .progress-container:hover {
+      height: 35px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #cc3333;
+      width: 0%;
+      border-radius: 12px 0 0 12px;
+      transition: width 0.5s ease, height 0.3s ease;
+    }
+
+    .progress-dates {
+      width: 80%;
+      max-width: 500px;
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Great Vibes', cursive;
+      font-size: 0.9rem;
+      color: white;
+      margin-bottom: 5px;
+    }
+
+    /* Today date displayed on hover */
+    .today-date {
+      width: 80%;
+      max-width: 500px;
+      text-align: center;
+      font-family: 'Great Vibes', cursive;
+      font-size: 0.9rem;
+      color: #ffcccc;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      margin-bottom: 40px;
+    }
+
+    .progress-container:hover + .today-date {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="flow-line"></div>
+
+  <div class="box-title">This is a task</div>
+
+  <div class="countdown-box">
+    <div class="days" id="days">0</div>
+    <div class="label">Days Remaining</div>
+  </div>
+
+  <div class="progress-title">You waited for</div>
+
+  <div class="progress-container">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  <!-- Dates below the progress bar -->
+  <div class="progress-dates">
+    <div class="progress-start">15 Oct</div>
+    <div class="progress-end">15 Jan</div>
+  </div>
+
+  <!-- Today date (hidden by default, shows on hover) -->
+  <div class="today-date" id="today-date"></div>
+
+  <script>
+    const totalDays = 90; 
+
+    function formatDate(date) {
+      const options = { day: 'numeric', month: 'short' };
+      return date.toLocaleDateString('en-US', options);
+    }
+
+    function updateCountdown() {
+      const today = new Date();
+      let targetYear = today.getFullYear();
+      const targetDate = new Date(targetYear, 0, 15); // Jan 15
+
+      if (today > targetDate) {
+        targetDate.setFullYear(targetYear + 1);
+      }
+
+      const timeDiff = targetDate - today;
+      const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+      document.getElementById('days').textContent = daysRemaining;
+
+      let daysPassed = totalDays - daysRemaining;
+      if (daysPassed < 0) daysPassed = 0;
+      if (daysPassed > totalDays) daysPassed = totalDays;
+
+      const percentage = (daysPassed / totalDays) * 100;
+      document.getElementById('progress-fill').style.width = percentage + '%';
+
+      // Update today date
+      document.getElementById('today-date').textContent = `Today: ${formatDate(today)}`;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000 * 60 * 60); // update hourly
+  </script>
+</body>
+</html>
